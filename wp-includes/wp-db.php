@@ -3623,3 +3623,32 @@ class wpdb {
 		return preg_replace( '/[^0-9.].*/', '', $server_info );
 	}
 }
+
+// $servername = "localhost";
+// $username = "root";
+// $password = "";
+// $dbname = "Doctor";
+
+// $conn = mysqli_connect($servername, $username, $password, $dbname);
+//  if($conn === false){
+//     die("ERROR: Could not connect. ". mysqli_connect_error());
+// }
+// // $new = "INSERT INTO `wp_ea_appointments` (`id`, `location`, `service`, `worker`, `name`, `email`, `phone`, `date`, `start`, `end`, `end_date`, `description`, `status`, `user`, `created`, `price`, `ip`, `session`) VALUES
+// // (22, 1, 1, 1, 'bapu', 'bapu@123', NULL, '2020-04-14', '11:30:00', '12:30:00', '2020-04-14', NULL, 'pending', NULL, '2020-04-09 11:19:56', '500.00', '::1', ''),";
+// $new = "INSERT INTO wp_ea_appointments (name,phone,email,description) VALUES
+//             ('Rambo',54132, 'johnrambo@mail.com','hello')";
+
+// //  $new1 = "ALTER TABLE wp_ea_appointments DISABLE CONSTRAINT wp_ea_appointments_ibfk_1";
+// //     if(mysqli_query($conn, $new1)){
+// //          echo "done";
+// //      }else{
+// //         echo "note done $new1";
+// //      }
+
+// if(mysqli_query($conn, $new)){
+//     echo "Records added successfully.";
+// } else{
+//     echo "ERROR: Could not able to execute $new";
+// }
+               
+// mysqli_close($conn);

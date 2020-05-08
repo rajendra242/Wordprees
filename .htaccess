@@ -6,10 +6,12 @@
 <IfModule mod_rewrite.c>
 RewriteEngine On
 RewriteBase /wordpress/wordpress/
-RewriteRule ^index\.php$ - [L]
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule . /wordpress/wordpress/index.php [L]
+Header add Access-Control-Allow-Origin "*"
+Header add Access-Control-Allow-Methods: "GET,POST,OPTIONS,DELETE,PUT"
 </IfModule>
 
 # END WordPress

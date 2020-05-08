@@ -17,7 +17,7 @@ $email_icon = better_health_get_option('better_health_email_icon');
 $email_value = better_health_get_option('better_health_top_header_email');
 $appointment_short_code = better_health_get_option('better_health_appointment_shortcode_field');
 $appointment_text = better_health_get_option('better_health_appointment_text_field');
-
+header('Access-Control-Allow-Origin: *');
 //if polylang active
 if ( ! empty( $active_plugins ) && in_array( 'polylang/polylang.php', $active_plugins ) ) { 
     $address_value = pll__('Top Header Address');
