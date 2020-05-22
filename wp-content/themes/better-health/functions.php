@@ -434,7 +434,8 @@ function register_api_hooks() {
         '/userbookingappointments/',
         array(
         'methods'  => 'GET',
-        'callback' => 'Userappointments')
+        'callback' => 'Userappointments'),
+        
         // header("Access-Control-Allow-Origin:http://localhost:4200/Home");
 
     ); 
@@ -473,6 +474,55 @@ function register_api_hooks() {
         'methods'  => 'POST',
         'callback' => 'newuser')
     ); 
+    register_rest_route(
+        'custom-plugin', 
+        '/forgotpass/',
+        array(
+        'methods'  => 'PUT',
+        'callback' => 'forgotpass')
+    ); 
+    register_rest_route(
+        'custom-plugin', 
+        '/conform/',
+        array(
+        'methods'  => 'GET',
+        'callback' => 'conform')
+    ); 
+    register_rest_route(
+        'custom-plugin', 
+        '/accept/',
+        array(
+        'methods'  => 'PUT',
+        'callback' => 'accept')
+    ); 
+    register_rest_route(
+        'custom-plugin', 
+        '/cancelled/',
+        array(
+        'methods'  => 'PUT',
+        'callback' => 'cancelled')
+    ); 
+    register_rest_route(
+        'custom-plugin', 
+        '/email/',
+        array(
+        'methods'  => 'POST',
+        'callback' => 'email')
+    ); 
+    register_rest_route(
+        'custom-plugin', 
+        '/newfor/',
+        array(
+        'methods'  => 'POST',
+        'callback' => 'newfor')
+    ); 
+    register_rest_route(
+        'custom-plugin', 
+        '/OTP/',
+        array(
+        'methods'  => 'GET',
+        'callback' => 'OTP')
+    ); 
     
 }
 
@@ -482,14 +532,29 @@ function login($request){
     session_start();
 
     // echo session_id();
-         $creds = array();
+        //  $creds = array();
              $creds['user_login'] = $request["username"];
              $creds['user_password'] =  $request["password"];
-             $creds['remember'] = true;
-             $user = wp_signon( $creds, false );
-
-            //  $food = (array)$user;
+            //  $creds['remember'] = true;
+             $user = wp_signon($creds,false);
+                
+            //  $food = (array)$user
             //  var_dump($food);
+            // if($request["username"] == '' || $request["password"] == '' ){
+            //     $required = "authenticaion Request";
+            //     http_response_code(401);
+            //     echo $required;
+            //     exit;
+            // }else{
+            //     // echo "login success";
+            // }
+
+            // if($request["usernmae"] !== $creds['user_login']){
+            //     $required = "bad Request";
+            //     http_response_code(400);
+            //     echo $required;
+            //     exit;
+            // }
 
             // $_SESSION['user_data'] = $user -> ID;
             // var_dump($_SESSION['user_data']);
@@ -501,13 +566,126 @@ function login($request){
             return $user;
     
 }
+function OTP($request){ 
 
+    $user_email = $_GET['user_email'];
+    $random_number = $_GET['random_number'];
+    // var_dump($user_email);
+
+    $servername = "localhost";
+    $username = "root";
+    $password = "";
+    $dbname = "doctor";
+
+    $conn = new mysqli($servername, $username, $password, $dbname);
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+
+    $sql = "SELECT random_number,date_time FROM wp_forgot WHERE user_email = '$user_email' AND random_number = '$random_number' 
+    AND NOW() <= DATE_ADD(date_time, INTERVAL 60 SECOND)";
+    $result = mysqli_query($conn, $sql);
+    $json_array = array();
+    // if (mysqli_num_rows($result) > 0) {
+        while($row = mysqli_fetch_assoc($result)) {            
+            $json_array[] = $row;
+            $json = json_encode($json_array,true);
+        }
+        $decod = json_decode($json);
+        // var_dump($decod);
+        $otp = ($decod[0]->random_number);
+        // var_dump($otp);
+        $date_time = ($decod[0]->date_time);
+
+        if($otp === $random_number){
+            echo "OTP IS Varifed";
+        }else{
+            echo "Try Again";
+        }
+       mysqli_close($conn);
+       $conn->close();
+
+}
+
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
+function newfor($request){
+
+    $user_email = $_POST['user_email'];
+    $email = $user_email;
+    $digits = $_POST['digits'];
+    $digits = mt_rand(100000, 999999);
+    $otp = $digits;
+    $today = date("Y-m-d H:i:s");                  
+    $con = mysqli_connect('localhost','root','','doctor');
+    $qy= "INSERT INTO wp_forgot (user_email,random_number,date_time) 
+    VALUES ('$user_email','$digits',now())";
+    
+    if ($con->query($qy) === TRUE) {
+        $last_id = $con->insert_id;
+        // var_dump($last_id);
+        // echo $last_id;
+    } 
+    else {
+        echo "Error: " . $qy . "<br>" . $con->error;
+    }
+
+
+    require('C:/xampp/htdocs/wordpress/wordpress/wp-content/themes/better-health/PHPMailer-master/PHPMailerAutoload.php');
+    require("C:/xampp/htdocs/wordpress/wordpress/wp-content/themes/better-health/PHPMailer-master/src/PHPMailer.php");
+    require("C:/xampp/htdocs/wordpress/wordpress/wp-content/themes/better-health/PHPMailer-master/src/SMTP.php");
+
+    $mail = new PHPMailer(true);
+    try{
+        $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      
+        $mail->isSMTP();                                            
+        $mail->Host       = 'smtp.gmail.com';                    
+        $mail->SMTPAuth   = true;                                   
+        $mail->Username   = 'rajendrasinhrathod779@gmail.com';                     
+        $mail->Password   = 'r1a2t3h4o5d6';                               
+        $mail->SMTPSecure = 'ssl';         
+        $mail->Port       = 465;           
+
+
+        $emaiadd = 'rajendrasinhrathod.rao@gmail.com';
+        $mail->setFrom('rajendrasinhrathod779@gmail.com', 'Rajendrasinh');
+        $mail->addAddress($user_email);     
+
+        $mail->isHTML(true);                                  
+        $mail->Subject = 'This Email From PHPMailer';
+        $mail->Body    = $otp;
+        $mail->AltBody = 'Wellcom To RaoInfotech';
+        
+        $mail->send();
+            // print_r( 'Message has been sent');
+    } 
+    catch (Exception $e)
+    {
+        // print_r("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
+    }
+
+       
+        
+}
 function id($request){
+    $location = $_POST['location'];
+    $service = $_POST['service'];
+    $worker = $_POST['worker'];
     $name = $_POST['name'];
     $email = $_POST['email'];
     $phone = $_POST['phone'];
-    $userID = $_POST['userID'];
+    $date = $_POST['date'];
+    $start = $_POST['start'];
+    $end = $_POST['end'];
+    $end_date = $_POST['end_date'];
     $description = $_POST['description'];
+    $status = $_POST['status'];
+    $user = $_POST['user'];
+    $price = $_POST['price'];
+    $userID = $_POST['userID'];
 
     if($name == '' || $email == '' || $phone == '' || $description == ""){
         $required = "BAD Request";
@@ -523,8 +701,13 @@ function id($request){
     }else{
         
         $con = mysqli_connect('localhost','root','','doctor');
-        $qy= "INSERT INTO wp_ea_appointments (name , email , phone , userID , description) 
-        VALUES ('$name' , '$email' , '$phone' , '$userID' , '$description')";
+        $qy= "INSERT INTO wp_ea_appointments (location,service,worker,name , email , phone ,date,start,end,end_date,description,status,user,price,userID) 
+        VALUES ('$location','$service','$worker',
+                '$name' , '$email' , '$phone' ,
+                '$date','$start','$end',
+                '$end_date','$description',
+                '$status','$user','$price',
+                 '$userID')";
 
         if ($con->query($qy) === TRUE) {
             $last_id = $con->insert_id;
@@ -541,12 +724,39 @@ function id($request){
 
 
 function Userappointments($request){
+    //  var_dump($request);
 
-    header("Access-Control-Allow-Origin:http://localhost:4200/Home");
+    $json = $request->get_headers();
+    // var_dump($json);
+
+    // echo " <h1> Yash </h1>";     
+    // echo "<br> hello";
+
+    // echo $json['auth'];
+
+    // $user_req_email = '';
+    foreach($json as $key => $feature) {
+        if($key == 'auth'){
+            $user_email = $feature[0];
+        }      
+    } 
+
+
+    // echo $user_email."<br>";
+    // print_r($user_email);
+
+    // if($user_email){
+    //     echo $user_email;
+    //  exit();
+    // }
+
+
+    
     $jason = json_encode($_SESSION['user_data']); 
     //  $userID = $_SESSION['user_data'];
      $userID = $_GET['userID'];
-    // echo $userID;
+    // $login = $_GET['user_login'];
+    // var_dump($login);
 
     $servername = "localhost";
     $username = "root";
@@ -557,33 +767,141 @@ function Userappointments($request){
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
-        $sql = "SELECT name, email, phone,description FROM wp_ea_appointments WHERE userID = $userID";
+    // $check_Email = "SELECT user_email FROM wp_users WHERE user_login = $login";
+    // $result = mysqli_query($conn, $check_Email);
+    // $Newj = array();
+    // while($row = mysqli_fetch_assoc($result)){
+    //     $Newj [] = $row;
+    //     $json = json_encode($Newj);
+    //     print_r($json);
+    //     if($user_email = $json){
+    //         var_dump($json);
+    //         echo "True";
+    //     }else{
+    //         echo "False";
+    //     }
+    // }
+
+    // $email = "rajendrasinhrathod779@gmail.com";
+    // $stmt = $pdo->prepare("SELECT * FROM wp_users WHERE email=?");
+    // $stmt->execute([$email]); 
+    // $user = $stmt->fetch();
+    // var_dump($user);
+    // if ($user) {
+    //     echo 'email found';
+    // } else {
+    //     echo 'or not';
+    // } 
+    
+    // $email = mysqli_query($conn,$check_Email);
+    
+    // $array = array();
+    // while($row = mysqli_fetch_assoc($email)){
+    //     $array[] = $row;
+    //     $json = json_encode($array);
+    //     $new_Email = $user_email;
+    // }
+    // if($new_Email !== $json){
+    //     echo "OPPS!";
+    // }else{
+    //     echo "Done";
+    // }
+    //  print_r($json);
+    //  if($json == $user_email){
+    //      echo "This email is in database";
+    //  }else{
+    //      echo "this is not right email";
+    //  }
+
+        // if($row = mysqli_fetch_assoc($check_Email)){
+        //     echo "DONE EMAIL IS THIS HEAER";
+        // }else{
+        //     echo "Try Again";
+        // }
+
+
+        $sql = "SELECT id,name, email, phone,description,status FROM wp_ea_appointments WHERE userID = $userID";
         $result = mysqli_query($conn, $sql);
         $json_array = array();
 
         // if (mysqli_num_rows($result) > 0) {
             while($row = mysqli_fetch_assoc($result)) {
-            //   $sql = "SELECT name, email, phone,description FROM wp_ea_appointments WHERE userID = $userID";
-            //         echo "name: "   . $row["name"]. "\n".
-            //              "email:"   . $row["email"]. "\n".
-            //              "phone: "  . $row["phone"].  "\n". 
-            //              "description:". $row["description"]."\n" ;
+          
                 $json_array[] = $row;
                 $json = json_encode($json_array);
 
                          
             }
             echo $json;
-            // ($json_array);
-        // } else 
-        // {
-            // echo "This User is not valid to see his bookings"; 
-        // }
-        // $result = json_encode($result);
-    mysqli_close($conn);
-    $conn->close();
+           mysqli_close($conn);
+           $conn->close();
+}
+function conform($request){
+    $userID = $_GET['userID'];
+    // var_dump($userID);
+    $servername = "localhost";
+    $username = "root";
+    $password = "";
+    $dbname = "doctor";
+
+    $conn = new mysqli($servername, $username, $password, $dbname);
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+    $sql = "SELECT name, email, phone,description,date,start,end,status FROM wp_ea_appointments WHERE userID = $userID";
+        $result = mysqli_query($conn, $sql);
+        $json_array = array();
+
+        // if (mysqli_num_rows($result) > 0) {
+            while($row = mysqli_fetch_assoc($result)) {
+          
+                $json_array[] = $row;
+                $json = json_encode($json_array);
+
+                         
+            }
+            echo $json;
+           mysqli_close($conn);
+           $conn->close();
+
 }
 
+function forgotpass($request){
+    $user_email = $_GET['user_email'];
+    // var_dump($user_email);
+    // print_r($email)."<br>";
+    // $user_pass = $_POST['user_pass'];
+    // $user_pass = md5($user_pass);
+    // var_dump($user_pass);
+
+
+    $servername = "localhost";
+    $username = "root";
+    $password = "";
+    $dbname = "doctor";
+        
+    $conn = new mysqli($servername, $username, $password, $dbname);
+
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+
+    parse_str(file_get_contents("php://input"),$_PUT);
+    // print_r($_PUT);
+    // $json_array[] = $_PUT;
+    // $json = json_encode($json_array);
+    // echo $json;
+
+    $sql = $conn->query("UPDATE wp_users SET
+    user_pass = '".md5($_PUT['user_pass'])."'
+    WHERE id= 73");    
+    if($sql==true){ 
+        echo "Records was updated successfully.";
+    } else{ 
+        echo "ERROR: Could not able to execute $sql. " . $mysqli->error;
+    } 
+    return $data;
+}
 function fatchdata($request){
     $id = $_GET['id'];
     
@@ -606,6 +924,8 @@ function fatchdata($request){
     $conn->close();
 }
 
+
+
 function update($request){
     $id = $_GET['id'];
     var_dump($id);
@@ -626,9 +946,6 @@ function update($request){
     $json = json_encode($json_array);
     echo $json;
 
-
-    $query=mysqli_query($conn, "UPDATE wp_ea_appointments SET
-     name='".$_PUT['name']."', email='".$_PUT['email']."',phone='".$_PUT['phone']."',description='".$_PUT['description']."' WHERE id='1546'");
     $sql = $conn->query("UPDATE wp_ea_appointments SET
     name='".$_PUT['name']."',
     email='".$_PUT['email']."',
@@ -678,17 +995,10 @@ function newuser($request){
     $user_email = $_POST['user_email'];
     $user_registered = $_POST['user_registered'];
     $display_name = $_POST['display_name'];
-
-    // var_dump($user_login);
-    // var_dump($user_pass);
-    // var_dump($user_nicename);
-    // var_dump($user_email);
-    // var_dump($user_registered);
-    // var_dump($display_name);
     
-     $user_pass = wp_hash_password("$user_pass");
-    // var_dump($user_pass);
+    $user_pass = wp_hash_password("$user_pass");
 
+    // $dt= date("Y-m-d h:i:sa");
 
     $servername = "localhost";
     $username = "root";
@@ -699,7 +1009,7 @@ function newuser($request){
         die("Connection failed: " . $conn->connect_error);
     }
 
-          $con = mysqli_connect('localhost','root','','doctor');
+    $con = mysqli_connect('localhost','root','','doctor');
 
         $qy= "INSERT INTO  wp_users (user_login,user_pass,user_nicename,user_email,user_registered,display_name) 
         VALUES ('$user_login','$user_pass','$user_nicename','$user_email','$user_registered','$display_name')";
@@ -715,9 +1025,84 @@ function newuser($request){
 
 
 
-
 function logout(){
     session_destroy();
+}
+
+function accept($request){
+
+    $id = $_GET['id'];
+    var_dump($id);
+    
+    $servername = "localhost";
+    $username = "root";
+    $password = "";
+    $dbname = "doctor";
+
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+
+    $con = mysqli_connect('localhost','root','','doctor');
+
+    parse_str(file_get_contents('php://input'),$_PUT);
+
+        
+    $sql = ("UPDATE wp_ea_appointments SET
+    status='confirmed'
+    WHERE id= $id");
+    $result = mysqli_query($con, $sql);
+    if($result==true){ 
+
+        echo "Records was updated successfully.";
+        
+    } else{ 
+        echo "ERROR: Could not able to execute $sql. " . $mysqli->error;
+    } 
+    return $data;
+
+
+}
+
+function cancelled($request){
+
+    $id = $_GET['id'];
+    var_dump($id);
+    
+    $servername = "localhost";
+    $username = "root";
+    $password = "";
+    $dbname = "doctor";
+
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+
+    $con = mysqli_connect('localhost','root','','doctor');
+
+    parse_str(file_get_contents('php://input'),$_PUT);
+
+        
+    $sql = ("UPDATE wp_ea_appointments SET
+    status='cancelled'
+    WHERE id= $id");
+    $result = mysqli_query($con, $sql);
+    if($result==true){ 
+
+        echo "Records was updated successfully.";
+        
+        
+    } else{ 
+        echo "ERROR: Could not able to execute $sql. " . $mysqli->error;
+    } 
+    return $data;
+
+
+}
+function email($request){
+    $email = $_GET['email'];
+
+    $newemail = include 'PHPMailer-master/index.php';
 }
 
  add_action( 'after_setup_theme', 'custom_login' );

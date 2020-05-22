@@ -313,7 +313,8 @@
 				<?php _e('Date', 'easy-appointments'); ?>
 			</th>
 			<th class="manage-column column-title"><?php _e('Is working', 'easy-appointments'); ?></th>
-			<th class="manage-column column-title column-15"><?php _e('Actions', 'easy-appointments'); ?></th>
+            <th class="manage-column column-title column-15"><?php _e('Actions', 'easy-appointments'); ?></th>
+            <th>Hello</th>
 		</tr>
 		</thead>
 		<tbody id="ea-connections">
@@ -388,7 +389,9 @@
 		<button class="button btn-edit"><?php _e('Edit','easy-appointments');?></button><br>
 		<button class="button btn-del"><?php _e('Delete','easy-appointments');?></button><br>
 		<button class="button btn-clone"><?php _e('Clone','easy-appointments');?></button><br>
-	</td>
+        <!-- <button class="button btn-custom"><?php _e('custom','easy-appointments');?></button><br> -->
+        
+    </td>
 </script>
 
 <script type="text/template" id="ea-tpl-connection-row-edit">

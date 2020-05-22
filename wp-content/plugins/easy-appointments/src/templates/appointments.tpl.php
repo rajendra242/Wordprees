@@ -98,6 +98,8 @@
 					<th class="manage-column column-title"><a class="ea-set-sort" data-key="date" href="#"><?php _e('Date & time', 'easy-appointments');?></a></th>
                     <th class="manage-column column-title"><?php _e('Status', 'easy-appointments');?> / <?php _e('Price', 'easy-appointments');?> / <a href="#" class="ea-set-sort" data-key="created"><?php _e('Created', 'easy-appointments');?></a></th>
 					<th class="manage-column column-title"><?php _e('Action', 'easy-appointments');?></th>
+					<th class="manage-column column-title"><?php _e('Button', 'easy-appointments');?></th>
+
 				</tr>
 			</thead>
 			<tbody id="ea-appointments">
@@ -142,6 +144,14 @@
 		<button class="button btn-del"><?php _e('Delete', 'easy-appointments');?></button>
 		<button class="button btn-clone"><?php _e('Clone', 'easy-appointments');?></button>
 	</td>
+	<td class="action-center">
+	
+			<button class="button"><a href="http://localhost/wordpress/wordpress/wp-json/custom-plugin/accept?id=<%= row.id %>&_method=PUT">Done</a></button>
+			<button class="button"><a href="http://localhost/wordpress/wordpress/wp-json/custom-plugin/cancelled?id=<%= row.id %>&_method=PUT">cencal</a></button>
+			<!-- <button class="button"><a href="http://localhost/wordpress/wordpress/wp-admin/admin-ajax.php?action=ea_appointment&id=1745&_method=PUT">varify</a></button> -->
+		<!-- <button class="button"><?php _e('Veryfiy','echo test()');?></button> -->
+		<!-- <button class="button"><?php _e('Delete','esay-appointments');?></button> -->
+	</td>	
 </script>
 
 <script type="text/template" id="ea-tpl-appointment-row-edit">

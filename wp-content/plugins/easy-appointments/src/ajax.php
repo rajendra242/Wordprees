@@ -292,6 +292,11 @@ class EAAjax
     /**
      * Final Appointment creation from frontend part
      */
+    // ***********veryfiy****************************
+    public function veryfiy(){
+        
+    }
+    // ************************************************
     public function ajax_final_appointment()
     {
         $this->validate_nonce();
@@ -1180,4 +1185,5 @@ class EAAjax
             $this->send_err_json_result('{"message":"' . $message . '"}');
         }
     }
+    
 }
